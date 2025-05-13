@@ -19,7 +19,7 @@ if not os.path.exists(METADATA_FILE):
 
 # SQL connection config from .env
 conn = pyodbc.connect(
-    f"DRIVER={{SQL Server}};"
+    f"DRIVER={{ODBC Driver 17 for SQL Server}};"  # OR FreeTDS if that fails
     f"SERVER={os.getenv('DB_HOST')};"
     f"DATABASE={os.getenv('DB_NAME')};"
     f"UID={os.getenv('DB_USER')};"
