@@ -1,0 +1,16 @@
+services:
+  - type: web
+    name: special-offers-admin
+    env: python
+    plan: free
+    buildCommand: ""
+    startCommand: python app.py
+    envVars:
+      - key: DB_HOST
+        value: 209.208.39.62
+      - key: DB_NAME
+        value: celerant
+      - key: DB_USER
+        value: twh-user
+      - key: DB_PASS
+        value: Z2p5!XRMvDBfwnj+X@TB

@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Manage Special Offers</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" />
+<style>
+  .form-container {
+    max-width: 700px;
+    margin: 20px auto;
+  }
+
+  .offer-table {
+    max-width: 1000px;
+    margin: 30px auto;
+  }
+
+  table {
+    width: 100%;
+  }
+
+  th, td {
+    vertical-align: top;
+    padding: 10px;
+    text-align: left;
+  }
+
+  th.style-id, td.style-id {
+    white-space: nowrap;
+    width: 100px;
+  }
+
+  th.product-code, td.product-code {
+    white-space: nowrap;
+    width: 80px;
+  }
+
+  .zoom-container {
+    position: relative;
+    display: inline-block;
+  }
+
+  .zoom-container img {
+    height: 60px;
+    cursor: zoom-in;
+    transition: transform 0.2s ease;
+  }
+
+  .zoom-container .zoom-preview {
+    display: none;
+    position: absolute;
+    top: -10px;
+    left: 70px;
+    z-index: 10;
+    border: 1px solid #ccc;
+    background: white;
+    padding: 5px;
+    box-shadow: 0 0 5px rgba(0,0,0,0.3);
+  }
+
+  .zoom-container:hover .zoom-preview {
+    display: block;
+  }
+
+  .zoom-preview img {
+    height: 200px;
+  }
+</style>
+
+</head>
+<body class="bg-light">
+  <div class="form-container">
+    <h3 class="text-center fw-bold">Manage Special Offers</h3>
+    <form method="POST" action="/add">
+      <input type="text" class="form-control mb-2" name="style_id" placeholder="Style ID" required />
+      <input type="text" class="form-control mb-2" name="email_name" placeholder="Email Name (Special Offer Title)" />
+      <input type="text" class="form-control mb-2" name="email_link" placeholder="Email Link (More Info URL)" />
+      <button type="submit" class="btn btn-danger">+ Add Offer</button>
+    </form>
+  </div>
+
+  <div class="offer-table">
+    <h5><strong>Current Offers</strong></h5>
+    <table class="table table-bordered table-hover bg-white">
+      <thead>
+        <tr>
+          <th>Image</th>
+          <th class="style-id">Style ID</th>
+          <th class="product-code">Product</th>
+          <th>Name</th>
+          <th>Email Name</th>
+          <th>Link</th>
+          <th>Delete</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for offer in offers %}
+        <tr>
+          <td>
+			<div class="zoom-container">
+				<img src="{{ offer.image }}" alt="product" />
+				<div class="zoom-preview">
+				<img src="{{ offer.image }}" alt="zoomed image" />
+				</div>
+			</div>
+		</td>
+          <td class="style-id">{{ offer.style_id }}</td>
+          <td class="product-code">{{ offer.product }}</td>
+          <td>{{ offer.name }}</td>
+          <td>
+            <span class="emailName">{{ offer.email_name }}</span>
+            <input type="text" class="form-control editEmailName d-none" value="{{ offer.email_name }}">
+          </td>
+          <td>
+            <a class="emailLink" href="{{ offer.email_link }}" target="_blank">More Info</a>
+            <input type="text" class="form-control editEmailLink d-none" value="{{ offer.email_link }}">
+          </td>
+          <td>
+            <form method="get" action="/delete/{{ offer.style_id }}" style="display:inline;">
+              <button class="btn btn-sm btn-outline-danger">🗑️</button>
+            </form>
+            <button class="btn btn-sm btn-outline-primary mt-1" onclick="toggleEdit(this)" data-styleid="{{ offer.style_id }}">✏️ Edit</button>
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+
+  <script>
+    function toggleEdit(button) {
+      const row = button.closest("tr");
+      const isEditing = button.textContent.trim() === "Save";
+      const styleId = button.getAttribute("data-styleid");
+
+      const spanName = row.querySelector(".emailName");
+      const inputName = row.querySelector(".editEmailName");
+      const linkText = row.querySelector(".emailLink");
+      const inputLink = row.querySelector(".editEmailLink");
+
+      if (isEditing) {
+        const updatedName = inputName.value;
+        const updatedLink = inputLink.value;
+
+        fetch("/update", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            style_id: styleId,
+            email_name: updatedName,
+            email_link: updatedLink
+          })
+        }).then(() => location.reload());
+      } else {
+        spanName.classList.add("d-none");
+        inputName.classList.remove("d-none");
+        linkText.classList.add("d-none");
+        inputLink.classList.remove("d-none");
+        button.textContent = "Save";
+      }
+    }
+  </script>
+</body>
+</html>
